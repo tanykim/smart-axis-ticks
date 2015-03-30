@@ -67,7 +67,8 @@ function getSmartTick(val) {
 _.each(_.range(4), function (i) {
 
   var svg = d3.select('svg').append('g')
-      .attr('transform', 'translate(' + ((dim.w + margin.left + margin.right) * Math.floor(i/2) + margin.left) + ',' +
+      .attr('transform', 'translate(' +
+        ((dim.w + margin.left + margin.right) * Math.floor(i/2) + margin.left) + ',' +
         ((dim.h + margin.top + margin.bottom) * (i%2) + margin.top) + ')');
 
   var x = d3.scale.ordinal().rangeBands([0, dim.w]).domain([0, 1, 2, 3, 4]);
