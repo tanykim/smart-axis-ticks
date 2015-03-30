@@ -41,7 +41,7 @@ var data = _.map(maxVals, function (d) {
   return [d/4, d/2, d, d/2, d/2];
 });
 
-function getSmartTick(val) {
+function getSmartTicks(val) {
 
   //base step between nearby two ticks
   var step = Math.pow(10, val.toString().length - 1);
@@ -74,7 +74,7 @@ _.each(_.range(4), function (i) {
   var x = d3.scale.ordinal().rangeBands([0, dim.w]).domain([0, 1, 2, 3, 4]);
 
   //get the end value of Y axis and the number of ticks
-  var yTicks = getSmartTick(maxVals[i], dim.h);
+  var yTicks = getSmartTicks(maxVals[i], dim.h);
 
   var y = d3.scale.linear().range([0, dim.h]).domain([yTicks.endPoint, 0]);
 
