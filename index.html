@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-size: 12px;
+  font-family: helvetica, arial, san-serif;
+}
+.axis line {
+  fill: none;
+  stroke: #999;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+.axis path {
+  fill: none;
+  stroke: none;
+}
+
+</style>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+// example data in five charts
+var maxVals =  [9, 40, 220, 1010, 5928];
+var data = _.map(maxVals, function (d) {
+  return [d/4, d/2, d, d/2, d/2];
+});
+
+//each chart dimension
+var margin = { top: 20, right: 20, bottom: 50, left: 50};
+var dim = { w: 960, h: 200};
+
+d3.select('body').append('svg')
+  .attr('width', dim.w + margin.left + margin.right)
+  .attr('height', (dim.h + margin.top + margin.bottom) * maxVals.length)
+
+function getSmartTick(val) {
+
+  //value between nearby two ticks
+  var step = Math.pow(10, val.toString().length - 1);
+
+  //modify steps either: 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000...
+  if (val / step < 2) {
+      step = step / 5;
+  } else if (val / step < 5) {
+      step = step / 2;
+  }
+
+  //add one more step if the last tick value is the same as the max value
+  //if you don't want to add, remove "+1"
+  var slicesCount = Math.ceil((val + 1) / step);
+
+  return {
+    endPoint: slicesCount * step,
+    count: Math.min(10, slicesCount) //show max 10 ticks
+  };
+
+}
+
+_.each(_.range(maxVals.length), function (i) {
+
+  var svg = d3.select('svg').append('g')
+      .attr('transform', 'translate(' + margin.left + ',' +
+        ((dim.h + margin.top + margin.bottom) * i + margin.top) + ')');
+
+  var x = d3.scale.ordinal().rangeBands([0, dim.w]).domain([0, 1, 2, 3, 4]);
+
+  //get the end value of Y axis and the number of ticks
+  var yTicks = getSmartTick(maxVals[i], dim.h);
+
+  var y = d3.scale.linear().range([0, dim.h]).domain([yTicks.endPoint, 0]);
+
+  var xAxis = d3.svg.axis().scale(x).orient('bottom').outerTickSize(0);
+  var yAxis = d3.svg.axis().scale(y).orient('left')
+            .ticks(yTicks.count)
+            .tickSize(-dim.w)
+            .tickPadding(9);
+
+  svg.append('g')
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0, ' + dim.h + ')')
+    .call(xAxis);
+  svg.append('g')
+    .attr('class', 'y axis')
+    .call(yAxis);
+
+  svg.selectAll('.rect')
+      .data(data[i])
+      .enter()
+    .append('rect')
+      .attr('x', function (d, j) { return x(j) + dim.w / data.length / 4; })
+      .attr('y', function (d) { return y(d); })
+      .attr('width', dim.w / data.length / 2)
+      .attr('height', function (d) { return dim.h - y(d); })
+      .attr('class', 'rect');
+
+  svg.append('text')
+    .attr('x', dim.w / 2)
+    .attr('y', y(maxVals[i]))
+    .attr('dy', -9)
+    .text(maxVals[i])
+    .style('text-anchor', 'middle')
+    .style('font-size', '14px');
+
+});
+
+</script>
